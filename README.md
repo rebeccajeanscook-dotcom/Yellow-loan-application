@@ -12,8 +12,43 @@ pricing.
 
 ## Running it
 
-(to fill in)
 
+Requires Python 3.10+.
+
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    python -m backend.seed
+    uvicorn backend.main:app --reload
+
+Open http://localhost:8000 for the app, or http://localhost:8000/docs
+for the interactive API documentation.
+
+## API
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/phones` | Catalogue with calculated finance terms. Optional `?monthly_income=` shows only phones where income exceeds 10x the monthly payment. |
+| POST | `/api/applications` | Create an application. `multipart/form-data`: form fields plus the proof-of-income file. |
+| GET | `/api/applications` | All applications, newest first. |
+| GET | `/api/applications/{id}/document` | Download the stored proof of income. |
+
+### Validation rules
+
+Every rule below is enforced server-side. The frontend mirrors them for
+immediate feedback, but the backend is the control — the frontend can be
+bypassed entirely.
+
+- **ID number:** exactly 13 digits, a valid embedded date, citizenship
+  digit of 0 or 1, and a correct Luhn check digit.
+- **Birthday** must match the date encoded in the ID number.
+- **Age** 18-65 inclusive, calculated from the ID's date of birth.
+- **ID numbers are unique.** Enforced by a UNIQUE constraint rather than
+  a pre-insert check, so two simultaneous requests cannot both succeed.
+- **Proof of income** is required: PDF, JPG or PNG, maximum 5 MB.
+
+Status codes: `201` created, `409` duplicate ID, `413` file too large,
+`415` unsupported file type, `422` validation failure, `404` not found.
 ## Data model
 
 **phones** — the catalogue. Stores only the three pricing *inputs*:
@@ -63,6 +98,10 @@ change plus a real migration tool.
   object storage with the key in the database.
 - **No migrations.** Schema changes require deleting `yellow.db` and
   recreating it. Alembic would handle this properly.
+- **Upload content types are self-declared.** The allowlist checks the
+  `Content-Type` the browser sends, which a determined caller can spoof.
+  Verifying magic bytes and serving uploads from a separate domain would
+  be the production fix.
 
 ## What I'd do next
 

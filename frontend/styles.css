@@ -1,0 +1,474 @@
+/* ============================================================
+   Yellow — loan application
+   Mobile-first: base styles target a phone; the media query at
+   the bottom is the only thing that assumes a bigger screen.
+   ============================================================ */
+
+:root {
+  --yellow:      #FFD400;
+  --yellow-dark: #E8C000;
+  --ink:         #16160F;
+  --ink-soft:    #45443B;
+  --muted:       #6E6C61;
+  --line:        #E4E2D8;
+  --paper:       #F7F6F2;
+  --surface:     #FFFFFF;
+  --danger:      #C0392B;
+  --danger-bg:   #FDF0EE;
+  --ok:          #2E7D52;
+  --radius:      12px;
+  --tap:         48px;          /* minimum comfortable tap target */
+}
+
+* { box-sizing: border-box; }
+
+[v-cloak] { display: none; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------- topbar */
+
+.topbar {
+  background: var(--ink);
+  padding: 14px 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #FFF;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.mark {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--yellow);
+}
+
+/* ----------------------------------------------------- shell */
+
+.shell {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+/* ------------------------------------------------ step meter */
+
+.steps {
+  display: flex;
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  gap: 6px;
+}
+
+.steps li {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border-top: 3px solid var(--line);
+  padding-top: 10px;
+}
+
+.steps li.done,
+.steps li.current { border-top-color: var(--yellow); }
+
+.bullet {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.steps li.done .bullet,
+.steps li.current .bullet {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+.steplabel {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.steps li.current .steplabel {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------ card */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px 18px;
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+}
+
+.lede {
+  color: var(--muted);
+  font-size: 14.5px;
+  margin: 0 0 20px;
+}
+
+.notice {
+  color: var(--muted);
+  font-size: 14.5px;
+  text-align: center;
+  padding: 24px 0;
+  margin: 0;
+}
+
+/* ---------------------------------------------------- fields */
+
+.field {
+  display: block;
+  margin-bottom: 18px;
+}
+
+.fieldlabel {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="number"] {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 12px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  /* 16px minimum: anything smaller makes iOS Safari zoom on focus. */
+  font-size: 16px;
+  font-family: inherit;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(255, 212, 0, 0.35);
+}
+
+input.invalid,
+.prefixed.invalid,
+.filedrop.invalid { border-color: var(--danger); }
+
+.error {
+  display: block;
+  color: var(--danger);
+  font-size: 13px;
+  font-style: normal;
+  margin-top: 6px;
+}
+
+.hint {
+  display: block;
+  color: var(--ok);
+  font-size: 13px;
+  font-style: normal;
+  margin-top: 6px;
+}
+
+/* currency-prefixed input */
+
+.prefixed {
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.prefixed:focus-within {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(255, 212, 0, 0.35);
+}
+
+.prefix {
+  display: grid;
+  place-items: center;
+  padding: 0 14px;
+  background: var(--paper);
+  border-right: 1.5px solid var(--line);
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.prefixed input {
+  border: none;
+  border-radius: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.prefixed input:focus { box-shadow: none; }
+
+/* --------------------------------------------------- upload */
+
+.filedrop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 96px;
+  padding: 18px;
+  border: 1.5px dashed var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  text-align: center;
+  cursor: pointer;
+}
+
+.filedrop:hover { border-color: var(--muted); }
+
+.filedrop.filled {
+  border-style: solid;
+  border-color: var(--ok);
+  background: #F2F9F5;
+}
+
+.filedrop strong {
+  font-size: 15px;
+  word-break: break-all;
+}
+
+.filedrop small { color: var(--muted); font-size: 13px; }
+
+/* --------------------------------------------------- phones */
+
+.phones {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.phone {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.phone:hover { border-color: var(--muted); }
+
+.phone.chosen {
+  border-color: var(--ink);
+  background: #FFFCE8;
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  color: #FFF;
+  font-weight: 700;
+  font-size: 19px;
+}
+
+.phonemain { display: flex; flex-direction: column; min-width: 0; }
+.phonemain strong { font-size: 15px; }
+.phonemain small { color: var(--muted); font-size: 12.5px; }
+
+.phoneprice { text-align: right; }
+.phoneprice strong { display: block; font-size: 17px; }
+.phoneprice small { color: var(--muted); font-size: 11.5px; }
+
+/* -------------------------------------------- review screen */
+
+.summary {
+  margin: 0 0 20px;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.summary > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.summary dt { color: var(--muted); font-size: 14px; }
+
+.summary dd {
+  margin: 0;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: right;
+  word-break: break-word;
+}
+
+.quote {
+  background: var(--yellow);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.quotename { margin: 0; font-weight: 700; font-size: 15px; }
+
+.quotedaily {
+  margin: 4px 0 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.quotedaily strong { font-size: 32px; letter-spacing: -0.03em; }
+.quotedaily span { font-size: 13px; }
+
+.quotelines { margin: 0; padding: 0; }
+
+.quotelines > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-top: 1px solid rgba(22, 22, 15, 0.15);
+  font-size: 13.5px;
+}
+
+.quotelines dt { color: rgba(22, 22, 15, 0.7); }
+.quotelines dd { margin: 0; font-weight: 600; }
+
+.servererror {
+  background: var(--danger-bg);
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: 9px;
+  padding: 11px 13px;
+  font-size: 14px;
+  margin: 0 0 16px;
+}
+
+/* -------------------------------------------------- buttons */
+
+.actions { display: flex; gap: 10px; }
+
+button {
+  flex: 1;
+  min-height: var(--tap);
+  padding: 13px 18px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+}
+
+.primary { background: var(--yellow); color: var(--ink); }
+.primary:hover:not(:disabled) { background: var(--yellow-dark); }
+
+.ghost {
+  background: transparent;
+  color: var(--ink-soft);
+  border-color: var(--line);
+  flex: 0 0 auto;
+  padding: 13px 20px;
+}
+
+.ghost:hover:not(:disabled) { border-color: var(--muted); }
+
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* -------------------------------------------------- success */
+
+.success { text-align: center; }
+
+.tick {
+  width: 56px;
+  height: 56px;
+  margin: 4px auto 14px;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: var(--ink);
+  font-size: 28px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.reference { margin: 0 0 10px; font-size: 15px; }
+.success .actions { margin-top: 20px; }
+
+/* ---------------------------------------------------- footer */
+
+.foot {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 16px 32px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ------------------------------------ wider screens only */
+
+@media (min-width: 560px) {
+  .shell { padding: 32px 20px 48px; }
+  .card { padding: 28px 26px; }
+  h1 { font-size: 25px; }
+  .steplabel { font-size: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

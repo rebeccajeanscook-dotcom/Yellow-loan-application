@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Yellow — Finance a phone</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div id="app" v-cloak>
+
+  <header class="topbar">
+    <div class="brand"><span class="mark"></span>Yellow</div>
+  </header>
+
+  <main class="shell">
+
+    <!-- progress -->
+    <ol class="steps" v-if="!submitted">
+      <li v-for="(label, i) in stepLabels" :key="label"
+          :class="{ done: step > i + 1, current: step === i + 1 }">
+        <span class="bullet">{{ i + 1 }}</span>
+        <span class="steplabel">{{ label }}</span>
+      </li>
+    </ol>
+
+    <!-- ============ STEP 1 — who you are ============ -->
+    <section class="card" v-if="step === 1 && !submitted">
+      <h1>Who are you?</h1>
+      <p class="lede">Enter your details exactly as they appear on your ID.</p>
+
+      <label class="field">
+        <span class="fieldlabel">Full name</span>
+        <input type="text" v-model="form.fullName" autocomplete="name"
+               placeholder="Rebecca Cook"
+               @blur="validateName"
+               :class="{ invalid: errors.fullName }">
+        <em class="error" v-if="errors.fullName">{{ errors.fullName }}</em>
+      </label>
+
+      <label class="field">
+        <span class="fieldlabel">SA ID number</span>
+        <input type="text" v-model="form.idNumber" inputmode="numeric"
+               maxlength="16" placeholder="13 digits"
+               @blur="validateIdNumber"
+               :class="{ invalid: errors.idNumber }">
+        <em class="error" v-if="errors.idNumber">{{ errors.idNumber }}</em>
+        <em class="hint" v-else-if="idHint">{{ idHint }}</em>
+      </label>
+
+      <label class="field">
+        <span class="fieldlabel">Date of birth</span>
+        <input type="date" v-model="form.dateOfBirth"
+               @blur="validateDateOfBirth"
+               :class="{ invalid: errors.dateOfBirth }">
+        <em class="error" v-if="errors.dateOfBirth">{{ errors.dateOfBirth }}</em>
+      </label>
+
+      <div class="actions">
+        <button class="primary" @click="goToStep(2)">Continue</button>
+      </div>
+    </section>
+
+    <!-- ============ STEP 2 — income ============ -->
+    <section class="card" v-if="step === 2 && !submitted">
+      <h1>What do you earn?</h1>
+      <p class="lede">Your monthly income before deductions, plus a payslip or
+        bank statement to support it.</p>
+
+      <label class="field">
+        <span class="fieldlabel">Monthly income</span>
+        <div class="prefixed" :class="{ invalid: errors.monthlyIncome }">
+          <span class="prefix">R</span>
+          <input type="number" v-model="form.monthlyIncome" inputmode="decimal"
+                 min="1" step="0.01" placeholder="25000"
+                 @blur="validateIncome">
+        </div>
+        <em class="error" v-if="errors.monthlyIncome">{{ errors.monthlyIncome }}</em>
+      </label>
+
+      <div class="field">
+        <span class="fieldlabel">Proof of income</span>
+        <label class="filedrop"
+               :class="{ invalid: errors.document, filled: form.document }">
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png"
+                 @change="onFileChange" hidden>
+          <template v-if="form.document">
+            <strong>{{ form.document.name }}</strong>
+            <small>{{ humanSize(form.document.size) }} — tap to replace</small>
+          </template>
+          <template v-else>
+            <strong>Choose a file</strong>
+            <small>PDF, JPG or PNG · up to 5 MB</small>
+          </template>
+        </label>
+        <em class="error" v-if="errors.document">{{ errors.document }}</em>
+      </div>
+
+      <div class="actions">
+        <button class="ghost" @click="step = 1">Back</button>
+        <button class="primary" @click="goToStep(3)">Continue</button>
+      </div>
+    </section>
+
+    <!-- ============ STEP 3 — choose a phone ============ -->
+    <section class="card" v-if="step === 3 && !submitted">
+      <h1>Choose your phone</h1>
+      <p class="lede" v-if="!loadingPhones && phones.length">
+        Phones you can afford on R{{ form.monthlyIncome }} a month, priced over
+        360 daily payments.
+      </p>
+
+      <p class="notice" v-if="loadingPhones">Loading phones…</p>
+
+      <p class="notice" v-else-if="!phones.length">
+        No phones match your income. Go back and check the amount you entered.
+      </p>
+
+      <ul class="phones" v-else>
+        <li v-for="phone in phones" :key="phone.id">
+          <label class="phone" :class="{ chosen: form.phoneId === phone.id }">
+            <input type="radio" name="phone" :value="phone.id"
+                   v-model="form.phoneId" hidden>
+            <span class="thumb" :style="{ background: brandColour(phone.brand) }">
+              {{ phone.brand.charAt(0) }}
+            </span>
+            <span class="phonemain">
+              <strong>{{ phone.brand }} {{ phone.model }}</strong>
+              <small>R{{ phone.cash_price }} cash · R{{ phone.deposit }} deposit</small>
+            </span>
+            <span class="phoneprice">
+              <strong>R{{ phone.daily_price }}</strong>
+              <small>per day</small>
+            </span>
+          </label>
+        </li>
+      </ul>
+
+      <div class="actions">
+        <button class="ghost" @click="step = 2">Back</button>
+        <button class="primary" @click="goToStep(4)" :disabled="!form.phoneId">
+          Continue
+        </button>
+      </div>
+    </section>
+
+    <!-- ============ STEP 4 — review and submit ============ -->
+    <section class="card" v-if="step === 4 && !submitted">
+      <h1>Check and submit</h1>
+
+      <dl class="summary">
+        <div><dt>Name</dt><dd>{{ form.fullName }}</dd></div>
+        <div><dt>ID number</dt><dd>{{ form.idNumber }}</dd></div>
+        <div><dt>Date of birth</dt><dd>{{ form.dateOfBirth }}</dd></div>
+        <div><dt>Monthly income</dt><dd>R{{ form.monthlyIncome }}</dd></div>
+        <div><dt>Proof of income</dt><dd>{{ form.document && form.document.name }}</dd></div>
+      </dl>
+
+      <div class="quote" v-if="chosenPhone">
+        <p class="quotename">{{ chosenPhone.brand }} {{ chosenPhone.model }}</p>
+        <p class="quotedaily">
+          <strong>R{{ chosenPhone.daily_price }}</strong>
+          <span>per day for 360 days</span>
+        </p>
+        <dl class="quotelines">
+          <div>
+            <dt>Cash price</dt>
+            <dd>R{{ chosenPhone.cash_price }}</dd>
+          </div>
+          <div>
+            <dt>Deposit today ({{ percent(chosenPhone.deposit_percent) }})</dt>
+            <dd>R{{ chosenPhone.deposit }}</dd>
+          </div>
+          <div>
+            <dt>Loan principal</dt>
+            <dd>R{{ chosenPhone.loan_principal }}</dd>
+          </div>
+          <div>
+            <dt>Total repayable ({{ percent(chosenPhone.interest_rate) }} interest)</dt>
+            <dd>R{{ chosenPhone.loan_amount }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <p class="servererror" v-if="serverError">{{ serverError }}</p>
+
+      <div class="actions">
+        <button class="ghost" @click="step = 3" :disabled="submitting">Back</button>
+        <button class="primary" @click="submit" :disabled="submitting">
+          {{ submitting ? 'Submitting…' : 'Submit application' }}
+        </button>
+      </div>
+    </section>
+
+    <!-- ============ SUCCESS ============ -->
+    <section class="card success" v-if="submitted">
+      <div class="tick" aria-hidden="true">✓</div>
+      <h1>Application received</h1>
+      <p class="reference">Reference <strong>#{{ result.id }}</strong></p>
+      <p class="lede" v-if="chosenPhone">
+        We'll be in touch about your {{ chosenPhone.brand }}
+        {{ chosenPhone.model }} at R{{ chosenPhone.daily_price }} a day.
+      </p>
+      <div class="actions">
+        <button class="ghost" @click="startOver">Start another application</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    Loans are repaid in 360 daily instalments. Deposit is payable on collection.
+  </footer>
+
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+<script src="/app.js"></script>
+
+</body>
+</html>
