@@ -157,6 +157,11 @@ def create_application(
             status_code=409,
             detail="An application already exists for this ID number.",
         )
+    except Exception:
+        # Any other failure: don't leave an orphaned file behind.
+        db.rollback()
+        (UPLOAD_DIR / stored_name).unlink(missing_ok=True)
+        raise
 
     db.refresh(application)
     return application
